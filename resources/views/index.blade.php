@@ -21,6 +21,19 @@
 
     </div>
   </div>
+
+  <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide='false' style="position: absolute;top:20px; right:20px;min-width: 250px;">
+    <div class="toast-header text-white">
+      <strong class="mr-auto">Response</strong>
+      <small class="text-white">just now</small>
+      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+        <span aria-hidden="true" class="text-white">&times;</span>
+      </button>
+    </div>
+    <div class="toast-body">
+      
+    </div>
+  </div>      
 @endsection
 
 @section('scripts')

@@ -2,13 +2,22 @@
 namespace App\Services;
 
 class CheckForHolidays{
-	public function search_in_array($value,$array){
-		foreach($array as $key=>$holiday){
+	protected $date;
+	public function __construct($date){
+		$this->date = $date;
+		$this->holidays = config('holidays');
+		date_default_timezone_set($this->holidays['timezone']);
+	}
+
+	public function search_in_array($date = null){
+		$date = !$date ? $this->date : $date;
+		$holidays   = $this->holidays['dates']; //array of all holidays;
+		foreach($holidays as $key=>$holiday){
 			switch(count($holiday)){
 				case count($holiday)==2 :	
-					if(date('d-m',strtotime($value)) == $holiday[0]){
-						if($this->checking_for_dayoff($value)){
-							$response = json_encode(['celebrity'=>$holiday[1],'add_day_offs'=>$this->checking_for_dayoff($value)]);
+					if(date('d-m',strtotime($date)) == $holiday[0]){
+						if($this->checking_for_dayoff($date)){
+							$response = json_encode(['celebrity'=>$holiday[1],'add_day_offs'=>$this->checking_for_dayoff($date)]);
 							return $response;
 						}
 						return json_encode(['celebrity'=>$holiday[1]]);
@@ -17,11 +26,11 @@ class CheckForHolidays{
 
 				case count($holiday)==3 :
 					if(ctype_digit($holiday[0][0])){
-						$from_date = $holiday[0]."-".explode('-', $value)[2];
-						$to_date   = $holiday[1]."-".explode('-', $value)[2];
-						if(strtotime($value) >= strtotime($from_date) && strtotime($value) <= strtotime($to_date)){
-							if($this->checking_for_dayoff($value) && strtotime($value) == strtotime($to_date)){
-								$response = json_encode(['celebrity'=>$holiday[2],'add_day_offs'=>$this->checking_for_dayoff($value)]);
+						$from_date = $holiday[0]."-".explode('-', $date)[2];
+						$to_date   = $holiday[1]."-".explode('-', $date)[2];
+						if(strtotime($date) >= strtotime($from_date) && strtotime($date) <= strtotime($to_date)){
+							if($this->checking_for_dayoff($date) && strtotime($date) == strtotime($to_date)){
+								$response = json_encode(['celebrity'=>$holiday[2],'add_day_offs'=>$this->checking_for_dayoff($date)]);
 								return $response;
 							}
 							return json_encode(['celebrity'=>$holiday[2]]);
@@ -36,7 +45,7 @@ class CheckForHolidays{
 						$month    = $this->month_number($holiday[2]); //month of expired
 
 						//finding month-nthweek
-						$inputed_year = explode('-', $value)[2];
+						$inputed_year = explode('-', $date)[2];
 						$first_day_of_month = "01-$month-$inputed_year";
 						if($nth_week == "first"){
 							$nth_week = 1;
@@ -49,7 +58,7 @@ class CheckForHolidays{
 						$nth_week == 1 ? $month_nth_week = $first_day_of_month : $month_nth_week = date('d-m-Y',strtotime($first_day_of_month)+(($nth_week-1)*7*86400));
 
 						if($nth_week==1){ 
-							if(date('w',strtotime($value))<$week_day && ctype_digit(date('w',strtotime($month_nth_week)))!=0){ //checking if this date's week_day later than inputed or not
+							if(date('w',strtotime($date))<$week_day && ctype_digit(date('w',strtotime($month_nth_week)))!=0){ //checking if this date's week_day later than inputed or not
 
 								$week_day == 7 ? $difference = date('w',strtotime($month_nth_week)) : $difference = date('w',strtotime($month_nth_week)) - $week_day;
 								
@@ -88,12 +97,18 @@ class CheckForHolidays{
 						}
 
 
-						if($value == $month_nth_week){
-							if($this->checking_for_dayoff($value)){
-								$response = json_encode(['celebrity'=>$holiday[3],'add_day_offs'=>$this->checking_for_dayoff($value)]);
+						if($date == $month_nth_week){
+							if($this->checking_for_dayoff($this->date)){
+								$response = json_encode(['celebrity'=>$holiday[3],'add_day_offs'=>$this->checking_for_dayoff($this->date)]);
 								return $response;
 							}
 							return json_encode(['celebrity'=>$holiday[3]]);
+						}
+					}
+					if(date('l',strtotime($date))=='Monday'){
+						if($this->checking_monday_dayoff($date)){
+							$celebrity = json_decode($this->checking_monday_dayoff($date));
+							return json_encode(['day_off'=>true,'previous_celebrity'=>$celebrity->celebrity]);
 						}
 					}
 			}
@@ -161,10 +176,30 @@ class CheckForHolidays{
 			$count = floor(($last_day_of_month-$nth_weekday)/7+2);
 		}
 		else{
-			$count = floor(($last_day_of_month-$nth_weekday)/7)+1;
+			$count = floor(($last_day_of_month-$nth_weekday)/7+1);
 		}
 
 		return $count;
+	}
+
+	private function checking_monday_dayoff($date){
+		if(date('l',strtotime($date))=="Monday"){
+			$previous_day   = date('d-m-Y',strtotime($date)-86400);
+			$two_days_later = date('d-m-Y',strtotime($date)-86400-86400);
+			if($this->search_in_array($previous_day) || $this->search_in_array($two_days_later)){
+				switch (true) {
+					case $this->search_in_array($previous_day):
+						return $this->search_in_array($previous_day);
+						break;
+
+					case $this->search_in_array($two_days_later):
+						return $this->search_in_array($two_days_later);
+						break;
+					
+				}
+			}
+		}
+		return false;
 	}
 }
 ?>
