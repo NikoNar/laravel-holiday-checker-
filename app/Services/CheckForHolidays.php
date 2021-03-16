@@ -59,7 +59,6 @@ class CheckForHolidays{
 
 						if($nth_week==1){ 
 							if(date('w',strtotime($date))<$week_day && ctype_digit(date('w',strtotime($month_nth_week)))!=0){ //checking if this date's week_day later than inputed or not
-
 								$week_day == 7 ? $difference = date('w',strtotime($month_nth_week)) : $difference = date('w',strtotime($month_nth_week)) - $week_day;
 								
 								$month_nth_week = date('d-m-Y',strtotime($month_nth_week)+((7-$difference)*86400)); //expired date;
@@ -83,20 +82,16 @@ class CheckForHolidays{
 
 							if(date('w',strtotime($month_nth_week))<$week_day && date('w',strtotime($month_nth_week))!= 0){
 								if(ctype_digit(date('m',strtotime($month_nth_week)+($week_day*86400)))>ctype_digit(date('m',strtotime($month_nth_week)))){
-									$month_nth_week = date('d-m-Y',strtotime($month_nth_week)-(8-$week_day)*86400);
-									
+									$month_nth_week = date('d-m-Y',strtotime($month_nth_week)-(8-$week_day)*86400);			
 								}
 								else{
 									$month_nth_week = date('d-m-Y',strtotime($month_nth_week)+($week_day-1)*86400);
-									
 								}
 							}
 							elseif (date('w',strtotime($month_nth_week))==0){
 								$month_nth_week = date('d-m-Y',strtotime($month_nth_week)-(6*86400)+($week_day-1)*86400);
 							}
 						}
-
-
 						if($date == $month_nth_week){
 							if($this->checking_for_dayoff($this->date)){
 								$response = json_encode(['celebrity'=>$holiday[3],'add_day_offs'=>$this->checking_for_dayoff($this->date)]);

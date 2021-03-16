@@ -7,45 +7,55 @@
 			],
 			[
 				date('07-01'), //constant  date holiday each year
-				"It's Christmas on that date" //
+				"It's Christmas on that date" // validation message
+			],
+			[	// holiday in range
+				date('01-05'), //starting date
+				date('07-05'), //ending date
+				"It's May month holidays on that date", //validation message
 			],
 			[
-				date('01-05'),
-				date('07-05'),
-				"It's May month holidays on that date",
+				date('03-03'), //starting date
+				date('10-03'), //ending date
+				"It's March month holidays on that date", //validation message
 			],
 			[
-				date('03-03'),
-				date('10-03'),
-				"It's March month holidays on that date",
-			],
-			[
-				'Monday',
-				"last",
-				'March',
-				'March Monday holiday'
+				'Monday', //Day of week
+				"last",	//nth week of month
+				'March', // month
+				'March Monday holiday' //validation message
 			], //nth week of month
 			[
-				'Saturday',
-				'first',
-				'June',
-				'Jun Saturday holiday'
+				'Saturday', //Day of week
+				'first', //nth week of month
+				'June',	//month
+				'Jun Saturday holiday' //validation message
 			], //nth week of month
 			[
-				'Thursday',
-				4,
-				'November',
-				'November Thursday holiday'
+				'Thursday', //Day of week
+				4, // nth week of month
+				'November', //month
+				'November Thursday holiday' //validation message
 				], //nth week of month
 			[
-				'Wednesday',
-				2,
-				'June',
-				'June Wednesday holiday'
+				'Wednesday', //day of week
+				2, // nth week of month
+				'June', //month
+				'June Wednesday holiday' //validation message
 			], //nth week of month
-			['Tuesday',2,'August','August Tuesday holiday'], //nth week of month
-			['Monday',2,'July','July Monday holiday'], //nth week of month
+			[
+				'Tuesday', //day of week
+				2,	//nth week of month
+				'August',	//month
+				'August Tuesday holiday'	//validation message
+			], //nth week of month
+			[
+				'Monday',	//day of week
+				2,	//nth week of month
+				'July',	//month
+				'July Monday holiday'	//validation message
+			], //nth week of month
 		],
-		'timezone' => 'Asia/Yerevan',
+		'timezone' => 'Asia/Yerevan',	//timezone
 	];
  ?>
