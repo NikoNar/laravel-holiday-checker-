@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class MainController extends Controller
+{
+	public function index(){
+		return view('index');
+	}    
+
+	public function compare(Request $data){
+		$input = explode(".",date("d.m.Y",strtotime($data->date)));
+		$input_day_month = $input[0].".".$input[1].'.'.$input[2];
+		$holidays = config('holidays');
+		
+		if($this->search_in_array($input_day_month,$holidays)){
+			print_r($this->search_in_array($input_day_month,$holidays));
+		}
+		
+	}
+
+	private function search_in_array($value,$array){
+		foreach($array as $element){
+			// single date
+			if(count($element) == 2){
+				dd(date('d.m',strtotime($value)));
+				if(ctype_digit($element[0][0])){
+					if($element[0] == $value){
+						return $element[1];	// celebrity
+					}
+				}
+			}
+			// range case
+			if(count($element)==3){
+				if(ctype_digit($element[0][0])){
+					if(strtotime($element[0])<=strtotime($value) && strtotime($value)<=strtotime($element[1])){
+						echo (strtotime($element[0]).'.'.strtotime($value).'.'.strtotime($element[1]));
+						dd(strtotime($element[0])<=strtotime($value) && strtotime($value)<=strtotime($element[1]));
+						return $element[2];	// celebrity
+					}
+				}
+
+			}
+			if(count($element)==4){
+				if(ctype_alpha($element[0][0])){
+					$month     = $this->month_number($element[0]);
+					$date 	   = strtotime(date("00.$month.Y"));
+					$days	   = $element[1]*7;
+					$from_date = strtotime("$days day",$date);
+					$weeks     = $element[1]*7*24*60*60;
+					$holidays  = ['from' => date('d.m.y',$from_date),'to' => date('d.m.y',strtotime('+7 days', $from_date))];
+					if(strtotime($holidays['from'])<=strtotime($value) && strtotime($value)<=strtotime($holidays['to'])){
+						return $element[2];
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private function month_number($mon){
+		$months = ['01' => 'January','02'=>'February','03'=>'March','04'=>'April','05'=>'May','06'=>'June','07'=>'July','08'=>'August','09'=>'September','10'=>'October','11'=>'November','12'=>'December'];
+
+		foreach($months as $key=>$month){
+			if($month == $mon){
+				return $key;
+			}
+		}
+		return false;
+	}
+
+}
