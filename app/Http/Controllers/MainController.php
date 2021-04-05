@@ -17,6 +17,6 @@ class MainController extends Controller
 	public function compare(DateRequest $data){
 		$input_date = date('d-m-Y',strtotime($data->date));
 		$checking   = new CheckForHolidays($input_date);
-		return $checking->search_in_array();
+		return $checking->searchInArray();
 	}
 }

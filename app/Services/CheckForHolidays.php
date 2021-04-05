@@ -9,15 +9,15 @@ class CheckForHolidays{
 		date_default_timezone_set($this->holidays['timezone']);
 	}
 
-	public function search_in_array($date = null){
+	public function searchInArray($date = null){
 		$date = !$date ? $this->date : $date;
 		$holidays   = $this->holidays['dates']; //array of all holidays;
 		foreach($holidays as $key=>$holiday){
 			switch(count($holiday)){
 				case count($holiday)==2 :	
 					if(date('d-m',strtotime($date)) == $holiday[0]){
-						if($this->checking_for_dayoff($date)){
-							$response = json_encode(['celebrity'=>$holiday[1],'add_day_offs'=>$this->checking_for_dayoff($date)]);
+						if($this->checkingForDayOff($date)){
+							$response = json_encode(['celebrity'=>$holiday[1],'add_day_offs'=>$this->checkingForDayOff($date)]);
 							return $response;
 						}
 						return json_encode(['celebrity'=>$holiday[1]]);
@@ -29,8 +29,8 @@ class CheckForHolidays{
 						$from_date = $holiday[0]."-".explode('-', $date)[2];
 						$to_date   = $holiday[1]."-".explode('-', $date)[2];
 						if(strtotime($date) >= strtotime($from_date) && strtotime($date) <= strtotime($to_date)){
-							if($this->checking_for_dayoff($date) && strtotime($date) == strtotime($to_date)){
-								$response = json_encode(['celebrity'=>$holiday[2],'add_day_offs'=>$this->checking_for_dayoff($date)]);
+							if($this->checkingForDayOff($date) && strtotime($date) == strtotime($to_date)){
+								$response = json_encode(['celebrity'=>$holiday[2],'add_day_offs'=>$this->checkingForDayOff($date)]);
 								return $response;
 							}
 							return json_encode(['celebrity'=>$holiday[2]]);
@@ -40,9 +40,9 @@ class CheckForHolidays{
 
 				case count($holiday)==4 :
 					if(ctype_alpha($holiday[0][0])){
-						$week_day = $this->week_number($holiday[0]); //week day of expired
+						$week_day = $this->weekNumber($holiday[0]); //week day of expired
 						$nth_week = $holiday[1]; //nth-week of expired 
-						$month    = $this->month_number($holiday[2]); //month of expired
+						$month    = $this->monthNumber($holiday[2]); //month of expired
 
 						//finding month-nthweek
 						$inputed_year = explode('-', $date)[2];
@@ -52,7 +52,7 @@ class CheckForHolidays{
 						}
 
 						if($nth_week == 'last'){
-							$nth_week = $this->find_last_week($first_day_of_month);
+							$nth_week = $this->fintLastMonday($first_day_of_month);
 						}
 
 						$nth_week == 1 ? $month_nth_week = $first_day_of_month : $month_nth_week = date('d-m-Y',strtotime($first_day_of_month)+(($nth_week-1)*7*86400));
@@ -93,16 +93,16 @@ class CheckForHolidays{
 							}
 						}
 						if($date == $month_nth_week){
-							if($this->checking_for_dayoff($this->date)){
-								$response = json_encode(['celebrity'=>$holiday[3],'add_day_offs'=>$this->checking_for_dayoff($this->date)]);
+							if($this->checkingForDayOff($this->date)){
+								$response = json_encode(['celebrity'=>$holiday[3],'add_day_offs'=>$this->checkingForDayOff($this->date)]);
 								return $response;
 							}
 							return json_encode(['celebrity'=>$holiday[3]]);
 						}
 					}
 					if(date('l',strtotime($date))=='Monday'){
-						if($this->checking_monday_dayoff($date)){
-							$celebrity = json_decode($this->checking_monday_dayoff($date));
+						if($this->checkingMondayDayOff($date)){
+							$celebrity = json_decode($this->checkingMondayDayOff($date));
 							return json_encode(['day_off'=>true,'previous_celebrity'=>$celebrity->celebrity]);
 						}
 					}
@@ -110,7 +110,8 @@ class CheckForHolidays{
 		}
 	}
 
-	private function month_number($mon){
+	// accepts string parameter (Month name) and returns it's number in year 
+	private function monthNumber($mon){
 		$months = ['01' => 'January','02'=>'February','03'=>'March','04'=>'April','05'=>'May','06'=>'June','07'=>'July','08'=>'August','09'=>'September','10'=>'October','11'=>'November','12'=>'December'];
     
 		foreach($months as $key=>$month){
@@ -121,7 +122,8 @@ class CheckForHolidays{
 		return false;
 	}
 
-	private function week_number($week){
+	// accepts string parameter (Week name) and returns it's number in week 
+	private function weekNumber($week){
 		$week_days = [1=>"Monday",2=>"Tuesday",3=>'Wednesday',4=>'Thursday',5=>'Friday',6=>'Saturday',7=>"Sunday"];
 
 		foreach($week_days as $key=>$week_day){
@@ -132,7 +134,8 @@ class CheckForHolidays{
 		return false;
 	}
 
-	private function checking_for_dayoff($date){
+	// function cheking if a day or two days later have been celebration or not,accepts one parameter of type string(date) and return boolean value
+	private function checkingForDayOff($date){
 		$week_day = date('w',strtotime($date));
 		if($week_day == 6 || $week_day == 7){
 			switch($week_day){
@@ -148,22 +151,8 @@ class CheckForHolidays{
 		return false;
 	}
 
-	private function checking_for_weekday($date,$nth_week,$holiday_weekday){  
-		if($nth_week==1){
-			$expired_date_weekday = date('w',strtotime($date));	
-			if($expired_date_weekday<=$holiday_weekday){
-				return "passed";
-			}
-			else{
-				for($i = $expired_date_weekday;$i<7+$holiday_weekday;$i++){
-					$date = date('d-m-Y',strtotime($date)+86400);					
-				}
-				return $date;
-			}
-		}
-	}
-
-	private function find_last_week($date){
+	//function finds the last week of the month,accepts string type parameter(date) and returns value of integer type
+	private function fintLastMonday($date){
 		$nth_weekday        = 8-date('w',strtotime($date)); //reversed nth_weekday
 		$last_day_of_month  = date('t',strtotime($date)); //nth month
 		$count = 0;
@@ -177,18 +166,19 @@ class CheckForHolidays{
 		return $count;
 	}
 
-	private function checking_monday_dayoff($date){
+	// function cheking if a day or two days later Monday have been celebration or not,accepts one parameter of type string(date) and return boolean value
+	private function checkingMondayDayOff($date){
 		if(date('l',strtotime($date))=="Monday"){
 			$previous_day   = date('d-m-Y',strtotime($date)-86400);
 			$two_days_later = date('d-m-Y',strtotime($date)-86400-86400);
-			if($this->search_in_array($previous_day) || $this->search_in_array($two_days_later)){
+			if($this->searchInArray($previous_day) || $this->searchInArray($two_days_later)){
 				switch (true) {
-					case $this->search_in_array($previous_day):
-						return $this->search_in_array($previous_day);
+					case $this->searchInArray($previous_day):
+						return $this->searchInArray($previous_day);
 						break;
 
-					case $this->search_in_array($two_days_later):
-						return $this->search_in_array($two_days_later);
+					case $this->searchInArray($two_days_later):
+						return $this->searchInArray($two_days_later);
 						break;
 					
 				}

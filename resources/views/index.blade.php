@@ -34,6 +34,18 @@
       
     </div>
   </div>      
+
+  {{-- <?php
+    $date1 = date_create("18-03-2021");
+    $date2 = date_create("17-02-2021");
+    $diff=date_diff($date1,$date2);
+    $months = $diff->format("%m months");
+    print_r($months);
+    $years = $diff->format("%y years");
+    $days = $diff->format("%d days");
+
+    {{  echo $years .' '.$months.' '.$days; }}
+   ?> --}}
 @endsection
 
 @section('scripts')
